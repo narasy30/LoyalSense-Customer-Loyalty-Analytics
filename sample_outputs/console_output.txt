@@ -1,0 +1,300 @@
+
+LOYALSENSE - CUSTOMER LOYALTY ANALYTICS
+Started at 2026-07-28 06:03:42   (analysis as-of 2026-04-01)
+
+########################################################################
+# STEP 1: DATA INGESTION & RFM DERIVATION
+########################################################################
+[data_loader] Loaded 20 rows x 11 columns from customers.csv
+[data_loader] Validation -> {'customers': 20, 'duplicate_ids': 0, 'missing_values': 0, 'zero_order_rows': 0, 'returns_exceed_orders': 0}
+[data_loader] Derived RFM for 20 customers (recency 1-479 days, spend Rs.31,000 - Rs.498,000)
+
+########################################################################
+# STEP 2: RFM SCORING, SEGMENTS, CHURN RISK & CLV
+########################################################################
+[rfm_engine] Score boundaries learned from 20 customers
+    recency_days   quintile cut-points: [4.8, 10.4, 52.8, 172.0]
+    frequency      quintile cut-points: [15.6, 21.6, 30.6, 49.2]
+    monetary       quintile cut-points: [69800.0, 94000.0, 146600.0, 293000.0]
+[rfm_engine] Scored 20 customers -> {'Champions': 3, 'Loyal Customers': 3, 'Cannot Lose Them': 3, 'At Risk': 3, 'New Customers': 3, 'Potential Loyalist': 2, 'Hibernating': 2, 'Promising': 1}
+customer_id           name  recency_days  frequency  monetary rfm_code            segment  churn_score churn_band      clv
+      C1001   Aarav Sharma             4         48    286000      544          Champions            4        LOW  84285.0
+      C1002      Diya Nair             7         62    412000      455          Champions            8        LOW 106931.0
+      C1003    Rohan Gupta             2         21     98000      523 Potential Loyalist            0        LOW  52868.0
+      C1004    Ananya Iyer            42         35    175000      344    Loyal Customers           23        LOW  49009.0
+      C1005   Vivaan Reddy           140         54    321000      255   Cannot Lose Them           58       HIGH  33720.0
+      C1006    Ishita Bose           208         29    143000      133            At Risk           77       HIGH   9788.0
+      C1007 Kabir Malhotra             3          6     31000      511      New Customers            0        LOW  29762.0
+      C1008 Meera Krishnan            12         18     72000      322          Promising           15        LOW  28984.0
+      C1009    Arjun Desai           291         41    208000      144   Cannot Lose Them          100       HIGH      0.0
+      C1010     Saanvi Rao             5         11     54000      411      New Customers            0        LOW  51839.0
+      C1011   Nikhil Verma            92         26    119000      233            At Risk           39     MEDIUM  23747.0
+      C1012    Tanvi Joshi             1         73    498000      555          Champions           14        LOW  95072.0
+      C1013   Aditya Menon            69         14     61000      211        Hibernating           50     MEDIUM  20035.0
+      C1014  Riya Kulkarni           364         22     88000      132            At Risk          100       HIGH      0.0
+      C1015   Devansh Shah             8         16     79000      422 Potential Loyalist            6        LOW  64123.0
+      C1016   Kavya Pillai           479         33    152000      144   Cannot Lose Them          100       HIGH      0.0
+      C1017   Yash Agarwal            14         24    131000      333    Loyal Customers           15        LOW  49303.0
+      C1018  Nandini Reddy             6          8     38000      411      New Customers            9        LOW  33197.0
+      C1019  Siddharth Rao           163         19     86000      222        Hibernating           73       HIGH   9080.0
+      C1020    Pooja Sinha            17         58    367000      355    Loyal Customers           14        LOW  65880.0
+
+########################################################################
+# STEP 3: EXPLORATORY DATA ANALYSIS
+########################################################################
+
+========================================================================
+EXPLORATORY DATA ANALYSIS
+========================================================================
+Customers            : 20
+Total revenue        : Rs.3,419,000
+Average order value  : Rs.5,133
+Median recency       : 16 days
+Total projected CLV  : Rs.807,623 of gross margin
+
+-- Segment breakdown --
+  Champions            3 cust  Rs.1,196,000 (35.0%)  recency     4d  churn    9  CLV Rs.  286,288
+  Cannot Lose Them     3 cust  Rs.  681,000 (19.9%)  recency   303d  churn   86  CLV Rs.   33,720
+  Loyal Customers      3 cust  Rs.  673,000 (19.7%)  recency    24d  churn   17  CLV Rs.  164,192
+  At Risk              3 cust  Rs.  350,000 (10.2%)  recency   221d  churn   72  CLV Rs.   33,535
+  Potential Loyalist   2 cust  Rs.  177,000 ( 5.2%)  recency     5d  churn    3  CLV Rs.  116,991
+  Hibernating          2 cust  Rs.  147,000 ( 4.3%)  recency   116d  churn   62  CLV Rs.   29,115
+  New Customers        3 cust  Rs.  123,000 ( 3.6%)  recency     5d  churn    3  CLV Rs.  114,798
+  Promising            1 cust  Rs.   72,000 ( 2.1%)  recency    12d  churn   15  CLV Rs.   28,984
+
+-- Churn risk bands --
+  LOW     12 customers   Rs.2,241,000 of historic revenue at stake
+  MEDIUM   2 customers   Rs.  180,000 of historic revenue at stake
+  HIGH     6 customers   Rs.  998,000 of historic revenue at stake
+
+-- The Pareto check --
+  Top 4 customers (20%) generate 46.7% of all revenue
+
+-- Correlation with total spend --
+  frequency          +0.988
+  avg_order_value    +0.890
+  tenure_days        +0.800
+  return_rate        +0.011
+  recency_days       -0.107
+[eda] saved 01_segment_revenue.png
+[eda] saved 02_rfm_map.png
+[eda] saved 03_churn_vs_value.png
+[eda] saved 04_segment_profiles.png
+
+########################################################################
+# STEP 4: UNSUPERVISED SEGMENTATION (K-MEANS)
+########################################################################
+
+========================================================================
+CHOOSING THE NUMBER OF CLUSTERS
+========================================================================
+ k  inertia  silhouette
+ 2    63.48       0.449
+ 3    28.51       0.499
+ 4    19.80       0.456
+ 5    16.40       0.384
+ 6    13.04       0.378
+
+Best silhouette at k = 3 (0.499)
+
+Fitted K-Means with k=3: sizes [10, 5, 5], silhouette 0.499
+
+Cluster profiles:
+         customers  recency  frequency  monetary     aov  churn        cluster_name
+cluster                                                                            
+0               10     25.3       17.9   85800.0  4782.3   15.7    Low-value active
+1                5     33.8       59.0  376800.0  6339.4   19.6   High-value active
+2                5    301.0       28.8  135400.0  4627.2   90.0  High-value lapsing
+[model] saved to segment_model.joblib
+[main] scored customers written to scored_customers.csv
+
+########################################################################
+# STEP 5: REAL-TIME EVENT STREAM
+########################################################################
+[data_loader] Loaded 16 rows x 8 columns from live_events.csv
+[data_loader] Event mix -> {'PURCHASE': 9, 'SUPPORT_TICKET': 4, 'RETURN': 2, 'REVIEW': 1}
+
+========================================================================
+REAL-TIME EVENT STREAM
+========================================================================
+State store initialised with 20 customer profiles
+
+[06:03:43] E001 09:12 C1012 Tanvi Joshi  [  --  ]
+    event   : PURCHASE via app - order #A8821
+    applied : purchase of Rs.8,400
+    profile : R5F5M5 | recency 0d | orders 74 | spend Rs.506,400 | AOV Rs.6,843
+    segment : Champions (High-value active) | churn 14/100 LOW | CLV Rs.96,664 (+1,592)
+    points  : +504 at 3.0x (balance 10,464)
+    action  : Invite to the VIP tier and early-access drops
+    offer   : Free express delivery for 12 months
+    LIVE KPI: 1 events | 1 customers | net Rs.8,400 | up 0 / down 0 | CLV +1,592
+
+[06:03:43] E002 09:38 C1007 Kabir Malhotra  [  --  ]
+    event   : PURCHASE via web - order #A8822
+    applied : purchase of Rs.6,200
+    profile : R5F1M1 | recency 0d | orders 7 | spend Rs.37,200 | AOV Rs.5,314
+    segment : New Customers (Low-value active) | churn 0/100 LOW | CLV Rs.35,710 (+5,948)
+    points  : +186 at 1.5x (balance 806)
+    action  : Onboarding journey and product education
+    offer   : 10% off the second order
+    LIVE KPI: 2 events | 2 customers | net Rs.14,600 | up 0 / down 0 | CLV +7,540
+
+[06:03:43] E003 10:05 C1005 Vivaan Reddy  [  UP  ]
+    event   : PURCHASE via app - order #A8823
+    applied : purchase of Rs.15,800
+    profile : R5F5M5 | recency 0d | orders 55 | spend Rs.336,800 | AOV Rs.6,124
+    segment : Champions (High-value active) | churn 23/100 LOW | CLV Rs.64,870 (+31,150)
+    MOVED   : segment Cannot Lose Them -> Champions
+    MOVED   : churn HIGH -> LOW
+    points  : +948 at 3.0x (balance 7,368)
+    action  : Invite to the VIP tier and early-access drops
+    offer   : Free express delivery for 12 months
+    LIVE KPI: 3 events | 3 customers | net Rs.30,400 | up 1 / down 0 | CLV +38,690
+
+[06:03:43] E004 10:41 C1003 Rohan Gupta  [  --  ]
+    event   : RETURN via web - return #R311
+    applied : return of Rs.4,200
+    profile : R5F2M2 | recency 2d | orders 21 | spend Rs.93,800 | AOV Rs.4,467
+    segment : Potential Loyalist (Low-value active) | churn 6/100 LOW | CLV Rs.47,566 (-5,302)
+    action  : Nudge towards a subscription plan
+    offer   : Free trial month
+    LIVE KPI: 4 events | 4 customers | net Rs.26,200 | up 1 / down 0 | CLV +33,388
+
+[06:03:43] E005 11:16 C1012 Tanvi Joshi  [  --  ]
+    event   : SUPPORT_TICKET via phone - delivery delayed by 6 days
+    applied : support ticket raised
+    profile : R5F5M5 | recency 0d | orders 74 | spend Rs.506,400 | AOV Rs.6,843
+    segment : Champions (High-value active) | churn 18/100 LOW | CLV Rs.92,168 (-4,496)
+    action  : Invite to the VIP tier and early-access drops
+    offer   : Free express delivery for 12 months
+    LIVE KPI: 5 events | 4 customers | net Rs.26,200 | up 1 / down 0 | CLV +28,892
+
+[06:03:43] E006 11:52 C1016 Kavya Pillai  [  UP  ]
+    event   : PURCHASE via app - order #A8824
+    applied : purchase of Rs.9,600
+    profile : R5F4M4 | recency 0d | orders 34 | spend Rs.161,600 | AOV Rs.4,753
+    segment : Champions (High-value lapsing) | churn 54/100 HIGH | CLV Rs.19,163 (+19,163)
+    MOVED   : segment Cannot Lose Them -> Champions
+    points  : +576 at 3.0x (balance 3,616)
+    action  : Escalate to the retention desk within 24 hours; then invite to the vip tier and early-access drops
+    offer   : Free express delivery for 12 months
+    *** ESCALATED: HIGH churn risk on a customer still worth Rs.19,163 of margin ***
+    LIVE KPI: 6 events | 5 customers | net Rs.35,800 | up 2 / down 0 | CLV +48,055
+
+[06:03:43] E007 12:20 C1014 Riya Kulkarni  [  --  ]
+    event   : RETURN via store - return #R312
+    applied : return of Rs.3,100
+    profile : R1F3M2 | recency 364d | orders 22 | spend Rs.84,900 | AOV Rs.3,859
+    segment : At Risk (High-value lapsing) | churn 100/100 HIGH | CLV Rs.0 (+0)
+    action  : Automated win-back email sequence
+    offer   : 15% voucher, valid 21 days
+    LIVE KPI: 7 events | 6 customers | net Rs.32,700 | up 2 / down 0 | CLV +48,055
+
+[06:03:43] E008 13:07 C1002 Diya Nair  [  --  ]
+    event   : PURCHASE via web - order #A8825
+    applied : purchase of Rs.22,400
+    profile : R5F5M5 | recency 0d | orders 63 | spend Rs.434,400 | AOV Rs.6,895
+    segment : Champions (High-value active) | churn 8/100 LOW | CLV Rs.112,720 (+5,789)
+    points  : +1344 at 3.0x (balance 9,584)
+    action  : Invite to the VIP tier and early-access drops
+    offer   : Free express delivery for 12 months
+    LIVE KPI: 8 events | 7 customers | net Rs.55,100 | up 2 / down 0 | CLV +53,844
+
+[06:03:43] E009 13:45 C1012 Tanvi Joshi  [  --  ]
+    event   : REVIEW via app - rating 2 of 5 - late delivery
+    applied : review of 2/5 (average now 4.17)
+    profile : R5F5M5 | recency 0d | orders 74 | spend Rs.506,400 | AOV Rs.6,843
+    segment : Champions (High-value active) | churn 23/100 LOW | CLV Rs.86,548 (-5,620)
+    action  : Invite to the VIP tier and early-access drops
+    offer   : Free express delivery for 12 months
+    LIVE KPI: 9 events | 7 customers | net Rs.55,100 | up 2 / down 0 | CLV +48,224
+
+[06:03:43] E010 14:18 C1010 Saanvi Rao  [  --  ]
+    event   : PURCHASE via app - order #A8826
+    applied : purchase of Rs.5,100
+    profile : R5F1M1 | recency 0d | orders 12 | spend Rs.59,100 | AOV Rs.4,925
+    segment : New Customers (Low-value active) | churn 0/100 LOW | CLV Rs.56,736 (+4,897)
+    points  : +153 at 1.5x (balance 1,233)
+    action  : Onboarding journey and product education
+    offer   : 10% off the second order
+    LIVE KPI: 10 events | 8 customers | net Rs.60,200 | up 2 / down 0 | CLV +53,121
+
+[06:03:43] E011 14:52 C1009 Arjun Desai  [  --  ]
+    event   : SUPPORT_TICKET via email - refund not received
+    applied : support ticket raised
+    profile : R1F4M4 | recency 291d | orders 41 | spend Rs.208,000 | AOV Rs.5,073
+    segment : Cannot Lose Them (High-value lapsing) | churn 100/100 HIGH | CLV Rs.0 (+0)
+    action  : Personal win-back call from an account manager
+    offer   : 25% voucher, valid 14 days
+    LIVE KPI: 11 events | 9 customers | net Rs.60,200 | up 2 / down 0 | CLV +53,121
+
+[06:03:43] E012 15:30 C1007 Kabir Malhotra  [  --  ]
+    event   : PURCHASE via app - order #A8827
+    applied : purchase of Rs.4,800
+    profile : R5F1M1 | recency 0d | orders 8 | spend Rs.42,000 | AOV Rs.5,250
+    segment : New Customers (Low-value active) | churn 0/100 LOW | CLV Rs.40,320 (+4,610)
+    points  : +144 at 1.5x (balance 950)
+    action  : Onboarding journey and product education
+    offer   : 10% off the second order
+    LIVE KPI: 12 events | 9 customers | net Rs.65,000 | up 2 / down 0 | CLV +57,731
+
+[06:03:43] E013 16:11 C1019 Siddharth Rao  [  UP  ]
+    event   : PURCHASE via web - order #A8828
+    applied : purchase of Rs.7,300
+    profile : R5F2M2 | recency 0d | orders 20 | spend Rs.93,300 | AOV Rs.4,665
+    segment : Potential Loyalist (Low-value active) | churn 38/100 MEDIUM | CLV Rs.22,602 (+13,522)
+    MOVED   : segment Hibernating -> Potential Loyalist
+    MOVED   : churn HIGH -> MEDIUM
+    MOVED   : cluster High-value lapsing -> Low-value active
+    points  : +219 at 1.5x (balance 1,939)
+    action  : Nudge towards a subscription plan
+    offer   : Free trial month
+    LIVE KPI: 13 events | 10 customers | net Rs.72,300 | up 3 / down 0 | CLV +71,253
+
+[06:03:43] E014 16:49 C1006 Ishita Bose  [  --  ]
+    event   : SUPPORT_TICKET via phone - product arrived damaged
+    applied : support ticket raised
+    profile : R1F3M3 | recency 208d | orders 29 | spend Rs.143,000 | AOV Rs.4,931
+    segment : At Risk (High-value lapsing) | churn 81/100 HIGH | CLV Rs.8,086 (-1,702)
+    action  : Automated win-back email sequence
+    offer   : 15% voucher, valid 21 days
+    LIVE KPI: 14 events | 11 customers | net Rs.72,300 | up 3 / down 0 | CLV +69,551
+
+[06:03:43] E015 17:25 C1020 Pooja Sinha  [  UP  ]
+    event   : PURCHASE via app - order #A8829
+    applied : purchase of Rs.12,900
+    profile : R5F5M5 | recency 0d | orders 59 | spend Rs.379,900 | AOV Rs.6,439
+    segment : Champions (High-value active) | churn 14/100 LOW | CLV Rs.68,205 (+2,325)
+    MOVED   : segment Loyal Customers -> Champions
+    points  : +774 at 3.0x (balance 8,114)
+    action  : Invite to the VIP tier and early-access drops
+    offer   : Free express delivery for 12 months
+    LIVE KPI: 15 events | 12 customers | net Rs.85,200 | up 4 / down 0 | CLV +71,876
+
+[06:03:43] E016 18:02 C1013 Aditya Menon  [ DOWN ]
+    event   : SUPPORT_TICKET via email - order not shipped after 9 days
+    applied : support ticket raised
+    profile : R2F1M1 | recency 69d | orders 14 | spend Rs.61,000 | AOV Rs.4,357
+    segment : Hibernating (Low-value active) | churn 54/100 HIGH | CLV Rs.18,432 (-1,603)
+    MOVED   : churn MEDIUM -> HIGH
+    action  : Escalate to the retention desk within 24 hours; then low-cost reactivation email
+    offer   : Free delivery on any order
+    *** ESCALATED: HIGH churn risk on a customer still worth Rs.18,432 of margin ***
+    LIVE KPI: 16 events | 13 customers | net Rs.85,200 | up 4 / down 1 | CLV +70,273
+
+[stream] action log written to realtime_actions.csv
+
+--- SESSION SUMMARY ---
+Events processed      : 16
+Customers touched     : 13 of 20
+Revenue / refunds     : Rs.92,500 / Rs.7,300  (net Rs.85,200)
+Loyalty points issued : 4,848
+Segment upgrades      : 4
+Segment downgrades    : 1
+Escalations raised    : 2
+Net CLV movement      : Rs.+70,273 of projected margin
+
+[main] summary written to summary_report.txt
+
+Pipeline finished successfully.
+

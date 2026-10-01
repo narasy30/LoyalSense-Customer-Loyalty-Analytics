@@ -1,0 +1,42 @@
+LOYALSENSE - CUSTOMER LOYALTY ANALYTICS - RUN SUMMARY
+Generated : 2026-07-28 06:03:43
+As-of date: 2026-04-01
+
+1. CUSTOMER BASE
+   Customers          : 20
+   Historic revenue   : Rs.3,419,000
+   Projected CLV      : Rs.807,623 of gross margin
+   Segment mix        : {'Champions': 3, 'Loyal Customers': 3, 'Cannot Lose Them': 3, 'At Risk': 3, 'New Customers': 3, 'Potential Loyalist': 2, 'Hibernating': 2, 'Promising': 1}
+   Churn bands        : {'LOW': 12, 'HIGH': 6, 'MEDIUM': 2}
+
+2. SEGMENTATION MODEL (unsupervised)
+   Chosen k           : 3
+   Silhouette         : 0.499
+   Inertia            : 28.51
+   Cluster sizes      : [10, 5, 5]
+
+   k selection table:
+     k=2  inertia=   63.48  silhouette=0.449
+     k=3  inertia=   28.51  silhouette=0.499
+     k=4  inertia=    19.8  silhouette=0.456
+     k=5  inertia=    16.4  silhouette=0.384
+     k=6  inertia=   13.04  silhouette=0.378
+
+   Cluster profiles:
+     0 Low-value active     n=10  recency=25d  freq=17.9  spend=Rs.85,800
+     1 High-value active    n=5  recency=34d  freq=59.0  spend=Rs.376,800
+     2 High-value lapsing   n=5  recency=301d  freq=28.8  spend=Rs.135,400
+
+3. REAL-TIME STREAM
+   Events processed   : 16
+   Customers touched  : 13
+   Revenue / refunds  : Rs.92,500 / Rs.7,300
+   Net revenue        : Rs.85,200
+   Points issued      : 4,848
+   Upgrades           : 4
+   Downgrades         : 1
+   Escalations        : 2
+   Net CLV movement   : Rs.+70,273
+
+Artefacts in outputs/: charts (*.png), segment_model.joblib,
+scored_customers.csv, realtime_actions.csv, summary_report.txt
